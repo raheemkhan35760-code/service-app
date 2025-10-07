@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeServe Pro - 24/7 Emergency Home Services</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4F46E5;
+            --secondary-color: #06B6D4;
+            --emergency-red: #DC2626;
+            --dark-bg: #0F172A;
+            --light-bg: #F8FAFC;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --accent-gradient: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background: var(--light-bg);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Emergency Banner */
+        .emergency-banner {
+            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+            color: white;
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        .emergency-text {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .emergency-contacts {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .emergency-btn {
+            background: white;
+            color: var(--emergency-red);
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .emergency-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Header & Navigation */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 60px;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .cta-btn {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Contact Info Section */
+        .contact-info-section {
+            background: white;
+            padding: 3rem 2rem;
+            margin-top: 140px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .contact-card {
+            text-align: center;
+            padding: 2rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 15px;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-card p {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 1rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 0;
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        /* Services Section */
+        .services-section {
+            max-width: 1400px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 3rem;
+            color: var(--text-dark);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .emergency-tag {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--emergency-red);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .service-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .service-card p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .service-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* Reviews Section */
+        .reviews-section {
+            max-width: 1400px;
+            margin: 6rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .review-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reviewer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .reviewer-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .review-rating {
+            color: #FFA500;
+            font-size: 1.1rem;
+        }
+
+        .review-text {
+            color: var(--text-light);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .review-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .verified-badge {
+            display: inline-block;
+            background: #10B981;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Service Detail Page */
+        .service-detail {
+            display: none;
+            max-width: 1400px;
+            margin: 6rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .service-detail.active {
+            display: block;
+        }
+
+        .detail-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .detail-header h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .booking-form {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* File Upload Section */
+        .upload-section {
+            border: 3px dashed #CBD5E1;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: #F8FAFC;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .file-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 0.5rem;
+        }
+
+        .preview-item img,
+        .preview-item video {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .remove-file {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--emergency-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .related-products {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .product-card {
+            border: 2px solid #E2E8F0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: border-color 0.3s;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: #E2E8F0;
+        }
+
+        .product-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* Tracking Section */
+        .tracking-section {
+            display: none;
+            max-width: 1400px;
+            margin: 6rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .tracking-section.active {
+            display: block;
+        }
+
+        .tracking-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .technician-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--light-bg);
+            border-radius: 15px;
+        }
+
+        .tech-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .tech-details h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating {
+            color: #FFA500;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #10B981;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        #map {
+            height: 500px;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .eta-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .eta-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--light-bg);
+            border-radius: 15px;
+        }
+
+        .eta-card h4 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .contact-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .call-btn {
+            background: #10B981;
+            color: white;
+        }
+
+        .message-btn {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Confirmation Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .close-modal {
+            margin-top: 2rem;
+            padding: 1rem 3rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--light-bg);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #E2E8F0;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 4rem 2rem 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .emergency-contacts {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .emergency-btn {
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
+            }
+
+            .detail-content {
+                grid-template-columns: 1fr;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .eta-info {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .technician-info {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Emergency Banner -->
+    <div class="emergency-banner">
+        <div class="emergency-text">
+            <span>🚨</span>
+            <span>24/7 EMERGENCY SERVICE - RESPONSE IN 15 MINUTES</span>
+        </div>
+        <div class="emergency-contacts">
+            <button class="emergency-btn" onclick="window.location.href='tel:+911800123456'">
+                📞 1800-123-456
+            </button>
+            <button class="emergency-btn" onclick="window.open('https://wa.me/919876543210', '_blank')">
+                💬 WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🏠 HomeServe Pro</div>
+            <ul class="nav-links">
+                <li><a href="#home" onclick="showHome()">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#reviews">Reviews</a></li>
+                <li><a href="#tracking" onclick="showTracking()">Track Order</a></li>
+            </ul>
+            <button class="cta-btn" onclick="showHome()">Get Started</button>
+        </nav>
+    </header>
+
+    <!-- Contact Info Section -->
+    <section class="contact-info-section">
+        <div class="contact-grid">
+            <div class="contact-card">
+                <div class="contact-icon">📞</div>
+                <h3>24/7 Emergency Hotline</h3>
+                <p>Instant Response Team</p>
+                <div class="contact-number">1800-123-456</div>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Toll-Free • Always Available</p>
+            </div>
+            <div class="contact-card">
+                <div class="contact-icon">📱</div>
+                <h3>Customer Care</h3>
+                <p>General Support</p>
+                <div class="contact-number">+91 98765 43210</div>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">10 AM - 8 PM Daily</p>
+            </div>
+            <div class="contact-card">
+                <div class="contact-icon">💬</div>
+                <h3>WhatsApp Support</h3>
+                <p>Quick Chat Response</p>
+                <div class="contact-number">+91 98765 43210</div>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Send Photos/Videos</p>
+            </div>
+            <div class="contact-card">
+                <div class="contact-icon">📧</div>
+                <h3>Email Support</h3>
+                <p>Detailed Inquiries</p>
+                <div class="contact-number" style="font-size: 1.1rem;">support@homeservepro.com</div>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">24-48 hrs response</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home-section">
+        <h1>🚨 Emergency Home Services 24/7</h1>
+        <p>Expert technicians at your doorstep - Track live with GPS • Send photos/videos for instant diagnosis</p>
+        <button class="cta-btn" style="font-size: 1.2rem; padding: 1rem 3rem;" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">
+            🚨 Book Emergency Service Now
+        </button>
+        <div class="hero-badges">
+            <div class="badge">⚡ 15 Min Response</div>
+            <div class="badge">✅ 50,000+ Customers</div>
+            <div class="badge">🏆 4.9/5 Rating</div>
+            <div class="badge">🔧 Certified Experts</div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section" id="services">
+        <h2 class="section-title">Our Emergency Services</h2>
+        <p style="text-align: center; color: var(--text-light); font-size: 1.2rem; margin-bottom: 3rem;">
+            Solution-oriented services available 24/7 with instant emergency response
+        </p>
+        <div class="services-grid" id="services-grid">
+            <!-- Services will be dynamically loaded -->
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section" id="reviews">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <p style="text-align: center; color: var(--text-light); font-size: 1.2rem; margin-bottom: 2rem;">
+            Real reviews from customers who experienced our emergency services
+        </p>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">SK</div>
+                    <div class="reviewer-info">
+                        <h4>Suresh Kumar</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "Amazing emergency service! My AC stopped at midnight during summer. Called their emergency hotline and they sent a technician within 20 minutes. The real-time GPS tracking showed me exactly when he would arrive. Professional work and fixed everything quickly!"
+                </p>
+                <p class="review-date">2 days ago • AC Repair Emergency</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">PM</div>
+                    <div class="reviewer-info">
+                        <h4>Priya Malhotra</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "Had a major plumbing leak at 3 AM! Sent photos through WhatsApp and they understood the problem immediately. Technician arrived with all the right parts in 18 minutes. The image upload feature saved so much time. Highly recommend for emergencies!"
+                </p>
+                <p class="review-date">5 days ago • Plumbing Emergency</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">RJ</div>
+                    <div class="reviewer-info">
+                        <h4>Rajesh Jain</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "Best solution-oriented company! Washing machine broke before an important event. Uploaded a video of the problem through their booking form. The technician came prepared and fixed it in 30 minutes. The live tracking feature is brilliant!"
+                </p>
+                <p class="review-date">1 week ago • Washing Machine Repair</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">AS</div>
+                    <div class="reviewer-info">
+                        <h4>Anjali Sharma</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "Electrical emergency at 2 AM with sparking from switchboard! Called the emergency number and someone answered immediately. Technician arrived in 12 minutes! The live GPS tracking kept me updated. True emergency service that actually works!"
+                </p>
+                <p class="review-date">3 days ago • Electrical Emergency</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">VK</div>
+                    <div class="reviewer-info">
+                        <h4>Vikram Kapoor</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "The video upload feature is genius! Sent a 30-second video of my refrigerator making strange noises. They diagnosed it remotely and brought the exact replacement part. No wasted trips. Very solution-focused approach. Will use again!"
+                </p>
+                <p class="review-date">1 week ago • Refrigerator Service</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-avatar">MN</div>
+                    <div class="reviewer-info">
+                        <h4>Meena Nair</h4>
+                        <div class="review-rating">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+                <p class="review-text">
+                    "Gas stove leak emergency! Contacted them via WhatsApp with photos. They responded within 2 minutes with safety instructions. Technician arrived in 15 minutes and solved everything safely. Their emergency response system is outstanding!"
+                </p>
+                <p class="review-date">4 days ago • Stove Repair Emergency</p>
+                <span class="verified-badge">✓ Verified Customer</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Detail Page -->
+    <div class="service-detail" id="service-detail">
+        <button class="back-btn" onclick="showHome()">
+            ← Back to Services
+        </button>
+        
+        <div class="detail-header">
+            <h2 id="detail-title"></h2>
+            <p id="detail-description"></p>
+        </div>
+
+        <div class="detail-content">
+            <!-- Booking Form -->
+            <div class="booking-form">
+                <h3 style="margin-bottom: 2rem; font-size: 2rem;">📋 Book Emergency Service</h3>
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="customerName" required placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="customerPhone" required placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address *</label>
+                        <input type="email" id="customerEmail" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Service Address *</label>
+                        <textarea id="serviceAddress" required rows="3" placeholder="Enter complete address with nearby landmark"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Service Type *</label>
+                        <select id="timeSlot" required>
+                            <option value="">Select service type</option>
+                            <option value="emergency">🚨 EMERGENCY (Arrive within 15 mins)</option>
+                            <option value="urgent">⚡ URGENT (Within 2 hours)</option>
+                            <option value="scheduled">📅 SCHEDULED (Choose date & time)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="scheduleDateGroup" style="display: none;">
+                        <label>Preferred Date</label>
+                        <input type="date" id="serviceDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Problem Description *</label>
+                        <textarea id="problemDesc" required rows="4" placeholder="Describe the problem in detail so we can prepare accordingly..."></textarea>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="form-group">
+                        <label>📸 Upload Photos/Videos of the Problem</label>
+                        <div class="upload-section">
+                            <div class="upload-icon">🎥</div>
+                            <h4>Help Us Diagnose Faster</h4>
+                            <p style="color: var(--text-light); margin: 0.5rem 0;">
+                                Upload images or videos showing the issue<br>
+                                <small>(Max 5 files • 10MB each • JPG, PNG, MP4)</small>
+                            </p>
+                            <input type="file" 
+                                   id="problemFiles" 
+                                   class="file-input" 
+                                   accept="image/jpeg,image/png,image/jpg,video/mp4,video/quicktime" 
+                                   multiple 
+                                   onchange="handleFileSelect(event)">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('problemFiles').click()">
+                                📁 Choose Files to Upload
+                            </button>
+                            <div id="filePreview" class="file-preview"></div>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">
+                            💡 Tip: Clear photos/videos help our technicians bring the right tools and parts
+                        </p>
+                    </div>
+
+                    <button type="submit" class="submit-btn">🚨 Confirm Emergency Booking</button>
+                    <p style="text-align: center; color: var(--emergency-red); margin-top: 1rem; font-weight: 600;">
+                        ⚡ Emergency technicians arrive in 15-20 minutes
+                    </p>
+                </form>
+            </div>
+
+            <!-- Related Products -->
+            <div class="related-products">
+                <h3 style="margin-bottom: 1rem; font-size: 2rem;">🛒 Recommended Products</h3>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">High-quality replacement parts and accessories</p>
+                <div class="product-grid" id="product-grid">
+                    <!-- Products will be dynamically loaded -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Section -->
+    <div class="tracking-section" id="tracking-section">
+        <button class="back-btn" onclick="showHome()">
+            ← Back to Home
+        </button>
+
+        <div class="tracking-container">
+            <h2 style="font-size: 3rem; margin-bottom: 2rem;">📍 Track Your Technician Live</h2>
+
+            <!-- Technician Info -->
+            <div class="technician-info">
+                <div class="tech-avatar">👨‍🔧</div>
+                <div class="tech-details">
+                    <h3 id="tech-name">Rajesh Kumar</h3>
+                    <div class="rating">⭐⭐⭐⭐⭐ 4.9/5.0 (248 reviews)</div>
+                    <p style="color: var(--text-light); margin: 0.5rem 0;">Expert Technician • 8 years experience • ID: HSP-7842</p>
+                    <span class="tech-status">🚗 En Route to Your Location</span>
+                    <p style="margin-top: 1rem; font-weight: 700; color: var(--primary-color);">
+                        📞 Direct Contact: <a href="tel:+919876511223" style="color: var(--primary-color);">+91 98765 11223</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map"></div>
+
+            <!-- ETA Information -->
+            <div class="eta-info">
+                <div class="eta-card">
+                    <h4>⏱️ 12 mins</h4>
+                    <p style="color: var(--text-light);">Estimated Arrival Time</p>
+                </div>
+                <div class="eta-card">
+                    <h4>📍 2.8 km</h4>
+                    <p style="color: var(--text-light);">Distance Remaining</p>
+                </div>
+                <div class="eta-card">
+                    <h4>🕐 4:24 PM</h4>
+                    <p style="color: var(--text-light);">Expected Arrival</p>
+                </div>
+            </div>
+
+            <!-- Contact Buttons -->
+            <div class="contact-buttons">
+                <button class="contact-btn call-btn" onclick="callTechnician()">
+                    📞 Call Technician Now
+                </button>
+                <button class="contact-btn message-btn" onclick="messageTechnician()">
+                    💬 Send Message
+                </button>
+                <button class="contact-btn" style="background: var(--emergency-red);" onclick="alert('Emergency alert sent to supervisor!')">
+                    🚨 Emergency Alert
+                </button>
+            </div>
+
+            <div style="margin-top: 2rem; padding: 1.5rem; background: #FEF3C7; border-left: 5px solid #F59E0B; border-radius: 10px;">
+                <h4 style="color: #92400E; margin-bottom: 0.5rem;">📌 Live Status Updates</h4>
+                <p style="color: #78350F; margin: 0.3rem 0;">✅ Booking confirmed - 3:45 PM</p>
+                <p style="color: #78350F; margin: 0.3rem 0;">✅ Technician assigned - 3:47 PM</p>
+                <p style="color: #78350F; margin: 0.3rem 0;">🚗 Technician started journey - 4:02 PM</p>
+                <p style="color: #F59E0B; font-weight: 600; margin: 0.3rem 0;">📍 Currently 2.8 km away - 4:12 PM</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <h3>Emergency Booking Confirmed!</h3>
+            <p style="color: var(--text-light); margin: 1rem 0;">
+                Your emergency service request has been dispatched. A technician is on the way to your location.
+            </p>
+            <div style="background: var(--light-bg); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0;">
+                <p style="font-weight: 700; color: var(--primary-color); font-size: 1.3rem; margin-bottom: 0.5rem;">
+                    Booking ID: #HSP-<span id="bookingId"></span>
+                </p>
+                <p style="color: var(--text-light); margin: 0.3rem 0;">📞 Technician: +91 98765 11223</p>
+                <p style="color: var(--text-light); margin: 0.3rem 0;">⏱️ ETA: 12-15 minutes</p>
+            </div>
+            <p style="color: var(--emergency-red); font-weight: 600; margin-bottom: 1rem;">
+                🚨 Emergency hotline: 1800-123-456
+            </p>
+            <button class="close-modal" onclick="closeModal()">📍 Track Live Location</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🏠 HomeServe Pro</h3>
+                <p>Your trusted 24/7 emergency home service partner with solution-oriented approach and real-time technician tracking.</p>
+                <p style="margin-top: 1rem; font-weight: 600;">📧 support@homeservepro.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>Emergency Services</h3>
+                <a href="#">Stove Repair</a>
+                <a href="#">Plumbing Services</a>
+                <a href="#">AC Repair</a>
+                <a href="#">Electrical Work</a>
+                <a href="#">All Services →</a>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <a href="#" onclick="showHome()">Home</a>
+                <a href="#services">Services</a>
+                <a href="#reviews">Customer Reviews</a>
+                <a href="#" onclick="showTracking()">Track Order</a>
+                <a href="#">About Us</a>
+            </div>
+            <div class="footer-section">
+                <h3>24/7 Support</h3>
+                <p>🚨 Emergency: 1800-123-456</p>
+                <p>📱 Customer Care: +91 98765 43210</p>
+                <p>💬 WhatsApp: +91 98765 43210</p>
+                <p>⏰ Available 24 hours, 7 days a week</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 HomeServe Pro. All rights reserved. | Solution-Oriented Emergency Services</p>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // Services Data
+        const services = [
+            {
+                id: 1,
+                name: "Emergency Stove Repair",
+                icon: "🔥",
+                description: "24/7 gas stove and cooktop emergency repairs",
+                price: "₹299",
+                emergency: true,
+                fullDescription: "Professional emergency stove repair including gas leaks, burner fixing, ignition problems, and safety inspections",
+                products: [
+                    { name: "Gas Burner Head", price: "₹450", image: "https://via.placeholder.com/150/FF6B6B/FFFFFF?text=Burner+Head" },
+                    { name: "Ignition Switch", price: "₹350", image: "https://via.placeholder.com/150/4ECDC4/FFFFFF?text=Ignition" },
+                    { name: "Stove Knob Set", price: "₹280", image: "https://via.placeholder.com/150/45B7D1/FFFFFF?text=Knobs" },
+                    { name: "Gas Regulator", price: "₹520", image: "https://via.placeholder.com/150/96CEB4/FFFFFF?text=Regulator" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Emergency Plumbing",
+                icon: "🔧",
+                description: "Urgent leak repairs and pipe emergencies",
+                price: "₹399",
+                emergency: true,
+                fullDescription: "24/7 emergency plumbing services for leaks, burst pipes, drainage blockages, and water supply issues",
+                products: [
+                    { name: "Premium Faucet", price: "₹1,200", image: "https://via.placeholder.com/150/FFEAA7/333333?text=Faucet" },
+                    { name: "Pipe Wrench Set", price: "₹450", image: "https://via.placeholder.com/150/DFE6E9/333333?text=Wrench" },
+                    { name: "Drain Cleaner", price: "₹280", image: "https://via.placeholder.com/150/74B9FF/FFFFFF?text=Cleaner" },
+                    { name: "Water Filter", price: "₹2,500", image: "https://via.placeholder.com/150/A29BFE/FFFFFF?text=Filter" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Emergency AC Repair",
+                icon: "❄️",
+                description: "Urgent AC breakdown and cooling issues",
+                price: "₹499",
+                emergency: true,
+                fullDescription: "24/7 emergency AC services including cooling failures, gas refilling, compressor issues, and electrical problems",
+                products: [
+                    { name: "Universal Remote", price: "₹350", image: "https://via.placeholder.com/150/FD79A8/FFFFFF?text=Remote" },
+                    { name: "HEPA Filter", price: "₹280", image: "https://via.placeholder.com/150/FDCB6E/333333?text=Filter" },
+                    { name: "Condenser Fan", price: "₹1,800", image: "https://via.placeholder.com/150/6C5CE7/FFFFFF?text=Fan" },
+                    { name: "Digital Thermostat", price: "₹950", image: "https://via.placeholder.com/150/00B894/FFFFFF?text=Thermostat" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Emergency Electrical",
+                icon: "💡",
+                description: "Power failures and electrical emergencies",
+                price: "₹349",
+                emergency: true,
+                fullDescription: "24/7 certified electricians for power outages, short circuits, wiring issues, and electrical safety emergencies",
+                products: [
+                    { name: "LED Bulb Pack", price: "₹450", image: "https://via.placeholder.com/150/FEF5E7/333333?text=LED+Bulbs" },
+                    { name: "Modular Switch", price: "₹680", image: "https://via.placeholder.com/150/E8DAEF/333333?text=Switch" },
+                    { name: "Extension Cord", price: "₹320", image: "https://via.placeholder.com/150/D5F4E6/333333?text=Cord" },
+                    { name: "MCB Breaker", price: "₹580", image: "https://via.placeholder.com/150/FAD7A0/333333?text=MCB" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Washing Machine SOS",
+                icon: "🧺",
+                description: "Urgent washing machine repairs",
+                price: "₹399",
+                emergency: false,
+                fullDescription: "Expert washing machine repair for all brands including drum issues, motor problems, drainage, and electronic failures",
+                products: [
+                    { name: "Drain Pump", price: "₹1,200", image: "https://via.placeholder.com/150/85C1E2/FFFFFF?text=Pump" },
+                    { name: "Door Lock", price: "₹650", image: "https://via.placeholder.com/150/F8B739/333333?text=Lock" },
+                    { name: "Drive Belt", price: "₹420", image: "https://via.placeholder.com/150/52B3D9/FFFFFF?text=Belt" },
+                    { name: "Control Board", price: "₹2,800", image: "https://via.placeholder.com/150/C3AED6/333333?text=Board" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Refrigerator Emergency",
+                icon: "🧊",
+                description: "Not cooling? We fix it fast!",
+                price: "₹449",
+                emergency: true,
+                fullDescription: "24/7 refrigerator emergency services for cooling failures, compressor issues, gas charging, and temperature problems",
+                products: [
+                    { name: "Thermostat", price: "₹850", image: "https://via.placeholder.com/150/B8E6B8/333333?text=Thermostat" },
+                    { name: "Door Gasket", price: "₹580", image: "https://via.placeholder.com/150/FFB6B9/333333?text=Gasket" },
+                    { name: "Compressor", price: "₹4,500", image: "https://via.placeholder.com/150/8EACBB/FFFFFF?text=Compressor" },
+                    { name: "Water Filter", price: "₹720", image: "https://via.placeholder.com/150/B4E7CE/333333?text=Filter" }
+                ]
+            },
+            {
+                id: 7,
+                name: "Carpenter Services",
+                icon: "🪚",
+                description: "Furniture repair and woodwork",
+                price: "₹299",
+                emergency: false,
+                fullDescription: "Professional carpentry for furniture repair, door/window fixing, cabinet installation, and custom woodwork",
+                products: [
+                    { name: "Door Hinges", price: "₹280", image: "https://via.placeholder.com/150/FFDAA0/333333?text=Hinges" },
+                    { name: "Cabinet Handles", price: "₹450", image: "https://via.placeholder.com/150/C7CEEA/333333?text=Handles" },
+                    { name: "Wood Adhesive", price: "₹180", image: "https://via.placeholder.com/150/FFDFD3/333333?text=Glue" },
+                    { name: "Drawer Slides", price: "₹520", image: "https://via.placeholder.com/150/A8E6CF/333333?text=Slides" }
+                ]
+            },
+            {
+                id: 8,
+                name: "Painting Services",
+                icon: "🎨",
+                description: "Interior and exterior painting",
+                price: "₹599",
+                emergency: false,
+                fullDescription: "Professional painting services for homes and offices with premium paints, wall preparation, and finishing",
+                products: [
+                    { name: "Paint Roller Set", price: "₹380", image: "https://via.placeholder.com/150/FFE5B4/333333?text=Roller" },
+                    { name: "Brush Set", price: "₹250", image: "https://via.placeholder.com/150/E6E6FA/333333?text=Brushes" },
+                    { name: "Wall Primer 5L", price: "₹1,200", image: "https://via.placeholder.com/150/FFFACD/333333?text=Primer" },
+                    { name: "Emulsion 10L", price: "₹2,800", image: "https://via.placeholder.com/150/F0E68C/333333?text=Paint" }
+                ]
+            },
+            {
+                id: 9,
+                name: "Emergency Pest Control",
+                icon: "🐜",
+                description: "Immediate pest elimination",
+                price: "₹699",
+                emergency: true,
+                fullDescription: "24/7 emergency pest control for cockroaches, termites, bedbugs, rodents, and mosquitoes with safe chemicals",
+                products: [
+                    { name: "Pest Spray", price: "₹480", image: "https://via.placeholder.com/150/98D8C8/333333?text=Spray" },
+                    { name: "Termite Powder", price: "₹620", image: "https://via.placeholder.com/150/F7DC6F/333333?text=Powder" },
+                    { name: "Rodent Trap", price: "₹320", image: "https://via.placeholder.com/150/BB8FCE/FFFFFF?text=Trap" },
+                    { name: "Repellent", price: "₹280", image: "https://via.placeholder.com/150/85C1E9/FFFFFF?text=Repellent" }
+                ]
+            },
+            {
+                id: 10,
+                name: "Deep Cleaning",
+                icon: "🧹",
+                description: "Professional home sanitization",
+                price: "₹799",
+                emergency: false,
+                fullDescription: "Comprehensive cleaning services including deep cleaning, sanitization, kitchen/bathroom cleaning, and organization",
+                products: [
+                    { name: "Vacuum Cleaner", price: "₹3,500", image: "https://via.placeholder.com/150/AED6F1/333333?text=Vacuum" },
+                    { name: "Mop System", price: "₹450", image: "https://via.placeholder.com/150/F9E79F/333333?text=Mop" },
+                    { name: "Cleaning Solution", price: "₹280", image: "https://via.placeholder.com/150/D5F4E6/333333?text=Solution" },
+                    { name: "Microfiber Cloth", price: "₹180", image: "https://via.placeholder.com/150/FADBD8/333333?text=Cloths" }
+                ]
+            },
+            {
+                id: 11,
+                name: "Geyser Emergency",
+                icon: "🚿",
+                description: "No hot water? Instant fix!",
+                price: "₹349",
+                emergency: true,
+                fullDescription: "24/7 water heater emergency services including element replacement, thermostat repair, and leakage fixes",
+                products: [
+                    { name: "Heating Element", price: "₹850", image: "https://via.placeholder.com/150/F5B7B1/333333?text=Element" },
+                    { name: "Safety Valve", price: "₹380", image: "https://via.placeholder.com/150/D7BDE2/333333?text=Valve" },
+                    { name: "Thermostat", price: "₹620", image: "https://via.placeholder.com/150/A3E4D7/333333?text=Thermostat" },
+                    { name: "Anode Rod", price: "₹480", image: "https://via.placeholder.com/150/FAD7A0/333333?text=Rod" }
+                ]
+            },
+            {
+                id: 12,
+                name: "TV Mounting & Repair",
+                icon: "📺",
+                description: "Wall mounting and TV repairs",
+                price: "₹399",
+                emergency: false,
+                fullDescription: "Professional TV installation, wall mounting, repair services for all brands and screen sizes",
+                products: [
+                    { name: "Wall Mount", price: "₹1,200", image: "https://via.placeholder.com/150/5DADE2/FFFFFF?text=Bracket" },
+                    { name: "HDMI Cable 4K", price: "₹280", image: "https://via.placeholder.com/150/F8C471/333333?text=HDMI" },
+                    { name: "Universal Remote", price: "₹350", image: "https://via.placeholder.com/150/AF7AC5/FFFFFF?text=Remote" },
+                    { name: "Power Strip", price: "₹420", image: "https://via.placeholder.com/150/7FB3D5/FFFFFF?text=Strip" }
+                ]
+            }
+        ];
+
+        let selectedFiles = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadServices();
+            initializeDateInput();
+            setupTimeSlotListener();
+        });
+
+        // Load Services
+        function loadServices() {
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = services.map(service => `
+                <div class="service-card" onclick="showServiceDetail(${service.id})">
+                    ${service.emergency ? '<div class="emergency-tag">🚨 24/7</div>' : ''}
+                    <div class="service-icon">${service.icon}</div>
+                    <h3>${service.name}</h3>
+                    <p>${service.description}</p>
+                    <div class="service-price">Starting ${service.price}</div>
+                    <button class="cta-btn" style="width: 100%;">
+                        ${service.emergency ? '🚨 Emergency Book' : 'Book Now'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Setup time slot listener
+        function setupTimeSlotListener() {
+            const timeSlotSelect = document.getElementById('timeSlot');
+            const scheduleDateGroup = document.getElementById('scheduleDateGroup');
+            
+            if (timeSlotSelect) {
+                timeSlotSelect.addEventListener('change', function() {
+                    if (this.value === 'scheduled') {
+                        scheduleDateGroup.style.display = 'block';
+                    } else {
+                        scheduleDateGroup.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Handle File Selection
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            const maxFiles = 5;
+            const maxSize = 10 * 1024 * 1024; // 10MB
+
+            if (selectedFiles.length + files.length > maxFiles) {
+                alert(`You can only upload maximum ${maxFiles} files`);
+                return;
+            }
+
+            files.forEach(file => {
+                if (file.size > maxSize) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB`);
+                    return;
+                }
+
+                selectedFiles.push(file);
+            });
+
+            displayFilePreview();
+        }
+
+        // Display File Preview
+        function displayFilePreview() {
+            const previewContainer = document.getElementById('filePreview');
+            previewContainer.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (file.type.startsWith('image/')) {
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <button class="remove-file" onclick="removeFile(${index})">×</button>
+                        `;
+                    } else if (file.type.startsWith('video/')) {
+                        previewItem.innerHTML = `
+                            <video src="${e.target.result}"></video>
+                            <button class="remove-file" onclick="removeFile(${index})">×</button>
+                        `;
+                    }
+                };
+                reader.readAsDataURL(file);
+
+                previewContainer.appendChild(previewItem);
+            });
+        }
+
+        // Remove File
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            displayFilePreview();
+        }
+
+        // Show Service Detail
+        function showServiceDetail(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('services').style.display = 'none';
+            document.getElementById('reviews-section').style.display = 'none';
+            document.getElementById('service-detail').classList.add('active');
+            
+            document.getElementById('detail-title').textContent = service.name;
+            document.getElementById('detail-description').textContent = service.fullDescription;
+            
+            const productGrid = document.getElementById('product-grid');
+            productGrid.innerHTML = service.products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    <div class="product-price">${product.price}</div>
+                </div>
+            `).join('');
+
+            // Reset form
+            document.getElementById('appointmentForm').reset();
+            selectedFiles = [];
+            displayFilePreview();
+        }
+
+        // Show Home
+        function showHome() {
+            document.getElementById('home-section').style.display = 'block';
+            document.getElementById('services').style.display = 'block';
+            document.querySelector('.reviews-section').style.display = 'block';
+            document.getElementById('service-detail').classList.remove('active');
+            document.getElementById('tracking-section').classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Form Submission
+        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const bookingId = Math.floor(100000 + Math.random() + 900000);
+            document.getElementById('bookingId').textContent = bookingId;
+            document.getElementById('confirmationModal').classList.add('active');
+            
+            // Simulate file upload
+            if (selectedFiles.length > 0) {
+                console.log(`Uploading ${selectedFiles.length} files...`);
+            }
+        });
+
+        // Close Modal and Show Tracking
+        function closeModal() {
+            document.getElementById('confirmationModal').classList.remove('active');
+            showTracking();
+        }
+
+        // Show Tracking
+        function showTracking() {
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('services').style.display = 'none';
+            document.querySelector('.reviews-section').style.display = 'none';
+            document.getElementById('service-detail').classList.remove('active');
+            document.getElementById('tracking-section').classList.add('active');
+            
+            setTimeout(initializeMap, 100);
+        }
+
+        // Initialize Map
+        let map;
+        let technicianMarker;
+        let customerMarker;
+
+        function initializeMap() {
+            if (map) {
+                map.remove();
+            }
+
+            const customerLocation = [28.6139, 77.2090]; // Delhi coordinates
+            const technicianLocation = [28.6289, 77.2190];
+
+            map = L.map('map').setView(customerLocation, 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            customerMarker = L.marker(customerLocation).addTo(map)
+                .bindPopup('<b>🏠 Your Location</b><br>Service Address')
+                .openPopup();
+
+            const technicianIcon = L.divIcon({
+                html: '<div style="background: #10B981; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.5);">🚗</div>',
+                className: 'technician-marker',
+                iconSize: [40, 40]
+            });
+
+            technicianMarker = L.marker(technicianLocation, {icon: technicianIcon}).addTo(map)
+                .bindPopup('<b>👨‍🔧 Technician</b><br>Rajesh Kumar<br>2.8 km away');
+
+            L.polyline([customerLocation, technicianLocation], {
+                color: '#4F46E5',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '10, 10'
+            }).addTo(map);
+
+            animateTechnician();
+        }
+
+        // Animate Technician Movement
+        function animateTechnician() {
+            setInterval(() => {
+                const currentPos = technicianMarker.getLatLng();
+                const customerPos = customerMarker.getLatLng();
+                
+                const newLat = currentPos.lat - (currentPos.lat - customerPos.lat) * 0.05;
+                const newLng = currentPos.lng - (currentPos.lng - customerPos.lng) * 0.05;
+                
+                technicianMarker.setLatLng([newLat, newLng]);
+            }, 5000);
+        }
+
+        // Contact Functions
+        function callTechnician() {
+            window.location.href = 'tel:+919876511223';
+        }
+
+        function messageTechnician() {
+            window.open('https://wa.me/919876511223?text=Hi, I need to discuss about the service', '_blank');
+        }
+
+        // Initialize Date Input
+        function initializeDateInput() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateInput = document.getElementById('serviceDate');
+            if (dateInput) {
+                dateInput.min = tomorrow.toISOString().split('T')[0];
+            }
+        }
+    </script>
+</body>
+</html>
